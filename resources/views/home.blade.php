@@ -1,96 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Check Location in Polygon</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-</head>
-<body>
-    <div id="map" style="height: 100vh;"></div>
+@extends('layouts.menu')
 
-    <script>
-        // Inisialisasi peta di Pekalongan
-        var map = L.map('map').setView([-6.8883, 109.6753], 13);
-
-        // Tambahkan tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Definisikan polygon sebagai area radius yang ditentukan
-        var editablePolygon = L.polygon([
-            [-6.8853, 109.6605],
-            [-6.8801, 109.6790],
-            [-6.8981, 109.6815],
-            [-6.9001, 109.6650],
-            [-6.8853, 109.6605]  // Tutup polygon
-        ], {
-            color: 'blue'
-        }).addTo(map);
-
-        // Fit the map to the polygon
-        map.fitBounds(editablePolygon.getBounds());
-
-        // Fungsi ray-casting untuk mengecek apakah lokasi ada dalam polygon
-        function isLocationInsidePolygon(latlng, polygon) {
-            var x = latlng.lat, y = latlng.lng;
-            var inside = false;
-
-            // Ambil semua koordinat dari polygon
-            var polyPoints = polygon.getLatLngs()[0];
-
-            for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
-                var xi = polyPoints[i].lat, yi = polyPoints[i].lng;
-                var xj = polyPoints[j].lat, yj = polyPoints[j].lng;
-
-                var intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-                if (intersect) inside = !inside;
-            }
-
-            return inside;
-        }
-
-        function onLocationFound(e) {
-          // Lokasi pengguna secara manual
-          // var userLocation = L.latLng([-6.8884, 109.6754]); // Buat manual untuk cek lokasi saja menjadi objek L.latLng
-            var userLocation = e.latlng; // Buat secara otomatis oleh sistem
-
-            // Tambahkan marker untuk lokasi pengguna
-            L.marker(userLocation).addTo(map)
-                .bindPopup("Lokasi Anda").openPopup();
-
-            // Cek apakah lokasi pengguna ada dalam polygon
-            if (!isLocationInsidePolygon(userLocation, editablePolygon)) {
-                alert("Anda tidak berada pada radius yang ditentukan!");
-            } else {
-                alert("Anda berada dalam radius yang ditentukan.");
-            }
-        }
-        
-        // Menangani error jika gagal mendapatkan lokasi
-        function onLocationError(e) {
-            alert("Error mendapatkan lokasi: " + e.message);
-        }
-
-        // Aktifkan fitur geolocation untuk mendapatkan lokasi pengguna
-        map.on('locationfound', onLocationFound);
-        map.on('locationerror', onLocationError);
-
-        // Memulai proses untuk mendapatkan lokasi pengguna
-        map.locate({setView: true, maxZoom: 16});
-
-        // // Tambahkan marker untuk lokasi pengguna
-        // L.marker(userLocation).addTo(map)
-        //     .bindPopup("Lokasi Anda").openPopup();
-
-        // // Cek apakah lokasi pengguna ada dalam polygon
-        // if (!isLocationInsidePolygon(userLocation, editablePolygon)) {
-        //     alert("Anda tidak berada pada radius yang ditentukan!");
-        // } else {
-        //     alert("Anda berada dalam radius yang ditentukan.");
-        // }
-    </script>
-</body>
-</html>
+@section('content')
+<div class="row gap-3 justify-content-center">
+    <div class="col-12 bg-white text-center rounded">
+        <span class="fs-1 fw-bold">SELAMAT DATANG</span>
+        <br>
+        <span class="fs-2 text-uppercase">DI SISTEM INFORMASI PRESENSI {{ Auth::user()->name }}</span>
+    </div>
+    <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
+        <img class="img-fluid p-3" src="{{ asset('images/menus/presensi.svg') }}" alt="Menu Presensi" srcset="Menu Presensi">
+        <p class="fw-bold text-uppercase fs-2">presensi</p>
+        <a href="{{ route('presensi') }}" class="stretched-link"></a>
+    </div>
+    <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
+        <img class="img-fluid p-3" src="{{ asset('images/menus/riwayat.svg') }}" alt="Menu Riwayat" srcset="Menu Riwayat">
+        <p class="fw-bold text-uppercase fs-2">riwayat</p>
+        <a href="{{ route('riwayat') }}" class="stretched-link"></a>
+    </div>
+    @role('admin')
+    <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
+        <img class="img-fluid p-3" src="{{ asset('images/menus/lokasi.svg') }}" alt="Menu Lokasi" srcset="Menu Lokasi">
+        <p class="fw-bold text-uppercase fs-2">lokasi</p>
+        <a href="{{ route('lokasi') }}" class="stretched-link"></a>
+    </div>
+    <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
+        <img class="img-fluid p-3" src="{{ asset('images/menus/jabatan.svg') }}" alt="Menu Jabatan" srcset="Menu Jabatan">
+        <p class="fw-bold text-uppercase fs-2">jabatan</p>
+        <a href="{{ route('jabatan.index') }}" class="stretched-link"></a>
+    </div>
+    <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
+        <img class="img-fluid p-3" src="{{ asset('images/menus/pegawai.svg') }}" alt="Menu Pegawai" srcset="Menu Pegawai">
+        <p class="fw-bold text-uppercase fs-2">pegawai</p>
+        <a href="{{ route('pegawai') }}" class="stretched-link"></a>
+    </div>
+    <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
+        <img class="img-fluid p-3" src="{{ asset('images/menus/akun.svg') }}" alt="Menu Akun" srcset="Menu Akun">
+        <p class="fw-bold text-uppercase fs-2">akun</p>
+        <a href="{{ route('akun') }}" class="stretched-link"></a>
+    </div>
+    <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
+        <img class="img-fluid p-3" src="{{ asset('images/menus/pengaturan.svg') }}" alt="Menu Pengaturan" srcset="Menu Pengaturan">
+        <p class="fw-bold text-uppercase fs-2">pengaturan</p>
+        <a href="{{ route('pengaturan') }}" class="stretched-link"></a>
+    </div>
+    @endrole
+    <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
+        <img class="img-fluid p-3" src="{{ asset('images/menus/logout.svg') }}" alt="Menu Keluar" srcset="Menu Keluar">
+        <p class="fw-bold text-uppercase fs-2">keluar</p>
+        <a href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logout-form').submit();" class="stretched-link"></a><form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
+    </div>
+</div>
+@endsection
