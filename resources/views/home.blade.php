@@ -19,9 +19,9 @@
     </div>
     @role('admin')
     <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
-        <img class="img-fluid p-3" src="{{ asset('images/menus/lokasi.svg') }}" alt="Menu Lokasi" srcset="Menu Lokasi">
-        <p class="fw-bold text-uppercase fs-2">lokasi</p>
-        <a href="{{ route('lokasi') }}" class="stretched-link"></a>
+        <img class="img-fluid p-3" src="{{ asset('images/menus/lokasi.svg') }}" alt="Menu Tempat Kerja" srcset="Menu Tempat Kerja">
+        <p class="fw-bold text-uppercase fs-2">Tempat Kerja</p>
+        <a href="{{ route('tempat-kerja.index') }}" class="stretched-link"></a>
     </div>
     <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
         <img class="img-fluid p-3" src="{{ asset('images/menus/jabatan.svg') }}" alt="Menu Jabatan" srcset="Menu Jabatan">
@@ -31,7 +31,7 @@
     <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
         <img class="img-fluid p-3" src="{{ asset('images/menus/pegawai.svg') }}" alt="Menu Pegawai" srcset="Menu Pegawai">
         <p class="fw-bold text-uppercase fs-2">pegawai</p>
-        <a href="{{ route('pegawai') }}" class="stretched-link"></a>
+        <a href="{{ route('pegawai.index') }}" class="stretched-link"></a>
     </div>
     <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
         <img class="img-fluid p-3" src="{{ asset('images/menus/akun.svg') }}" alt="Menu Akun" srcset="Menu Akun">

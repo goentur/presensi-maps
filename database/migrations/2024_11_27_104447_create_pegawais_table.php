@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('pegawais', function (Blueprint $table) {
             $table->id();
+            $table->string('nip')->unique();
             $table->bigInteger('user_id');
             $table->bigInteger('jabatan_id');
             $table->bigInteger('tempat_kerja_id');

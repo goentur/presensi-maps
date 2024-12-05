@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tempat_kerjas', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            $table->string('koordinat');
+            $table->string('koordinat')->nullable();
             $table->timestamps();
         });
     }
