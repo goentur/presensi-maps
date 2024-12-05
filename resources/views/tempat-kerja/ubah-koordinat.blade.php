@@ -61,10 +61,9 @@
         layers.eachLayer(function(layer) {
             var latlngs = layer.getLatLngs(); // Ambil koordinat baru dari polygon)
             $.ajax({
-                url: "{{ route($attribute['link'].'ubah-koordinat') }}",
+                url: "{{ route($attribute['link'].'ubah-koordinat',$data->id) }}",
                 type: "POST",
                 data: {
-                    id: "{{$data->id}}",
                     koordinat: JSON.stringify(latlngs), // Konversi array ke JSON
                 },
                 dataType: "JSON",

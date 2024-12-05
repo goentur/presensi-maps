@@ -1,0 +1,1 @@
+<span class="badge bg-{{$data->color()}}">{{$data}}</span>

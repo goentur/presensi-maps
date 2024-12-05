@@ -134,13 +134,11 @@ class TempatKerjaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function ubahKoordinat(Request $request)
+    public function ubahKoordinat(Request $request, TempatKerja $tempatKerja)
     {
         $request->validate([
-            'id' => 'required|exists:tempat_kerjas,id',
             'koordinat' => 'required|string|max:255',
         ]);
-        $tempatKerja = TempatKerja::find($request->id);
         $tempatKerja->update([
             'koordinat' => $request->koordinat,
         ]);

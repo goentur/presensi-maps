@@ -34,14 +34,14 @@
         <a href="{{ route('pegawai.index') }}" class="stretched-link"></a>
     </div>
     <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
+        <img class="img-fluid p-3" src="{{ asset('images/menus/pengaturan.svg') }}" alt="Menu Pengaturan" srcset="Menu Pengaturan">
+        <p class="fw-bold text-uppercase fs-2">pengaturan</p>
+        <a href="{{ route('pengaturan.index') }}" class="stretched-link"></a>
+    </div>
+    <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
         <img class="img-fluid p-3" src="{{ asset('images/menus/akun.svg') }}" alt="Menu Akun" srcset="Menu Akun">
         <p class="fw-bold text-uppercase fs-2">akun</p>
         <a href="{{ route('akun') }}" class="stretched-link"></a>
-    </div>
-    <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
-        <img class="img-fluid p-3" src="{{ asset('images/menus/pengaturan.svg') }}" alt="Menu Pengaturan" srcset="Menu Pengaturan">
-        <p class="fw-bold text-uppercase fs-2">pengaturan</p>
-        <a href="{{ route('pengaturan') }}" class="stretched-link"></a>
     </div>
     @endrole
     <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
