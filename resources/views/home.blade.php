@@ -41,11 +41,13 @@
         <a href="{{ route('pegawai.index') }}" class="stretched-link"></a>
     </div>
     @endrole
+    @role(['admin','pegawai'])
     <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
         <img class="img-fluid p-3" src="{{ asset('images/menus/akun.svg') }}" alt="Menu Akun" srcset="Menu Akun">
         <p class="fw-bold text-uppercase fs-2">akun</p>
         <a href="{{ route('akun.index') }}" class="stretched-link"></a>
     </div>
+    @endrole
     <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
         <img class="img-fluid p-3" src="{{ asset('images/menus/logout.svg') }}" alt="Menu Keluar" srcset="Menu Keluar">
         <p class="fw-bold text-uppercase fs-2">keluar</p>
