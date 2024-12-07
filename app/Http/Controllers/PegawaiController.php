@@ -26,6 +26,12 @@ class PegawaiController extends Controller
         if ($request->ajax()) {
             return DataTables::eloquent(Pegawai::with('user', 'tempat_kerja', 'jabatan')->select('id', 'nip', 'user_id', 'tempat_kerja_id', 'jabatan_id'))
                 ->addIndexColumn()
+                ->addColumn('hak_akses', function (Pegawai $data) {
+                    $kirim = [
+                        'data' => $data,
+                    ];
+                    return view($this->attribute['view'] . 'hak-akses', $kirim);
+                })
                 ->addColumn('aksi', function (Pegawai $data) {
                     $kirim = [
                         'data' => $data,
@@ -41,6 +47,7 @@ class PegawaiController extends Controller
             ->addColumn(['data' => 'user.name', 'name' => 'user.name', 'title' => 'NAMA'])
             ->addColumn(['data' => 'jabatan.nama', 'name' => 'jabatan.nama', 'title' => 'JABATAN'])
             ->addColumn(['data' => 'tempat_kerja.nama', 'name' => 'tempat_kerja.nama', 'title' => 'TEMPAT KERJA'])
+            ->addColumn(['class' => 'text-center', 'data' => 'hak_akses', 'name' => 'hak_akses', 'title' => 'HAK AKSES'])
             ->addColumn(['class' => 'w-1', 'data' => 'aksi', 'name' => 'aksi', 'title' => 'AKSI'])
             ->parameters([
                 'ordering' => false,
@@ -83,12 +90,14 @@ class PegawaiController extends Controller
             'jabatan' => 'required|exists:jabatans,id',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'hak_akses' => 'required|in:admin,pegawai',
         ]);
         $user = User::create([
             'name' => $request->nama,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+        $user->assignRole($request->hak_akses);
         Pegawai::create([
             'nip' => $request->nip,
             'user_id' => $user->id,
@@ -131,10 +140,12 @@ class PegawaiController extends Controller
             'tempatKerja' => 'required|exists:tempat_kerjas,id',
             'jabatan' => 'required|exists:jabatans,id',
             'email' => 'required|string|email|max:255|unique:users,email,' . $pegawai->user_id,
+            'hak_akses' => 'required|in:admin,pegawai',
         ]);
         $pegawai->user->update([
             'name' => $request->nama,
         ]);
+        $pegawai->user->syncRoles($request->hak_akses);
         $pegawai->update([
             'nip' => $request->nip,
             'tempat_kerja_id' => $request->tempatKerja,
