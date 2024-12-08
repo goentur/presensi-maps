@@ -137,7 +137,7 @@ class TempatKerjaController extends Controller
     public function ubahKoordinat(Request $request, TempatKerja $tempatKerja)
     {
         $request->validate([
-            'koordinat' => 'required|string|max:255',
+            'koordinat' => 'required|string',
         ]);
         $tempatKerja->update([
             'koordinat' => $request->koordinat,

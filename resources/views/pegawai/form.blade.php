@@ -77,7 +77,6 @@
                         <strong>{{ $message }}</strong>
                     </span>
                     @enderror
-                    
                     <label for="hak_akses" class="form-label text-uppercase mt-3">HAK AKSES <span class="text-danger">*</span></label>
                     <select required name="hak_akses" id="hak_akses" class="form-control select2">
                         <option value="">Pilih salah satu</option>
