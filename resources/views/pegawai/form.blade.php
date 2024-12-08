@@ -81,8 +81,10 @@
                     <label for="hak_akses" class="form-label text-uppercase mt-3">HAK AKSES <span class="text-danger">*</span></label>
                     <select required name="hak_akses" id="hak_akses" class="form-control select2">
                         <option value="">Pilih salah satu</option>
-                        <option @selected($data->user->roles->pluck('name')[0]=='admin') value="admin">Admin</option>
-                        <option @selected($data->user->roles->pluck('name')[0]=='pegawai') value="pegawai">Pegawai</option>
+                        <option @isset($data)@selected($data->user->roles->pluck('name')[0]=='admin')
+                        @endisset value="admin">Admin</option>
+                        <option @isset($data)@selected($data->user->roles->pluck('name')[0]=='pegawai')
+                        @endisset value="pegawai">Pegawai</option>
                     </select>
                     @error('hak_akses')
                     <strong class="text-danger f-12">{{ $message }}</strong>
