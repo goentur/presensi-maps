@@ -10,8 +10,8 @@
             <h1>{{ $pengaturan->tipe }}</h1>
 
             <div class="d-flex flex-column align-items-center">
-                <video id="camera-stream" autoplay playsinline class="border rounded mb-3" style="max-width: 640px; width: 100%;"></video>
-                <canvas id="snapshot" class="border rounded mb-3" style="display: none; max-width: 640px; width: 100%;"></canvas>
+                <video id="camera-stream" autoplay playsinline class="border rounded mb-3" style="max-width: 100%;"></video>
+                <canvas id="snapshot" class="border rounded mb-3" style="display: none; max-width: 100%;"></canvas>
 
                 <!-- Buttons -->
             </div>
@@ -55,7 +55,8 @@
                 video.srcObject = stream;
             })
             .catch(function (err) {
-                alert('Error accessing the camera: ' + err.message);
+                $('#capture').addClass('d-none');
+                alertApp("error","Error accessing the camera: "+ err.message);
             });
         }
 
@@ -190,16 +191,16 @@
 
         // Cek apakah lokasi pengguna ada dalam polygon
         if (!isLocationInsidePolygon(userLocation, editablePolygon)) {
-            $('#ambilGambar').hide();
+            $('#capture').addClass('d-none');
         } else {
             koordinat = userLocation;
-            $('#ambilGambar').show();
+            $('#capture').removeClass('d-none');
         }
     }
     
     // Menangani error jika gagal mendapatkan lokasi
     function onLocationError(e) {
-        $('#ambilGambar').hide();
+        $('#capture').addClass('d-none');
         alertApp("error",e.message);
     }
     
