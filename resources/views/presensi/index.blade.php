@@ -9,22 +9,19 @@
         @if ($pengaturan)
             <h1>{{ $pengaturan->tipe }}</h1>
 
-            <video id="camera-stream" autoplay playsinline></video>
-            <button id="capture">Capture</button>
-            <canvas id="snapshot"></canvas>
+            <div class="d-flex flex-column align-items-center">
+                <video id="camera-stream" autoplay playsinline class="border rounded mb-3" style="max-width: 640px; width: 100%;"></video>
+                <canvas id="snapshot" class="border rounded mb-3" style="display: none; max-width: 640px; width: 100%;"></canvas>
 
-
-            <div id="kamera" style="width: 100%;height: 30vh;"></div>
-            <div id="results"></div>
+                <!-- Buttons -->
+            </div>
             <div id="map" class="mt-1" style="height: 30vh;"></div>
-            <div id="ambilGambar" class="mt-3" style="display:none">
+            <div id="button-group">
                 <h3 class="m-0 p-0 text-primary" id="local-date"></h3>
                 <h3 class="m-0 p-0 text-primary fw-semibold" id="local-time"></h3>
-                <button type="button" class="btn btn-primary" onclick="preview_snapshot()"><i class="h1 m-0 p-0 fa fa-camera"></i></button>
-            </div>
-            <div id="simpanGambar" class="mt-3" style="display:none">
-                <button type="button" class="btn btn-danger" onclick="cancel_preview()"><i class="h1 m-0 p-0 fa fa-rotate-left"></i></button>
-                <button type="button" class="btn btn-success" onclick="save_photo()"><i class="h1 m-0 p-0 fa fa-save"></i></button>
+                <button id="capture" class="btn btn-primary"><i class="h1 m-0 p-0 fa fa-camera"></i></button>
+                <button id="save" class="btn btn-success d-none"><i class="h1 m-0 p-0 fa fa-save"></i></button>
+                <button id="reset" class="btn btn-secondary d-none"><i class="h1 m-0 p-0 fa fa-rotate-left"></i></button>
             </div>
         @else
             <div class="alert alert-warning">
@@ -47,32 +44,72 @@
     let waktu;
     let koordinat;
     $(document).ready(function() {
+        const video = $('#camera-stream')[0];
+        const canvas = $('#snapshot')[0];
+        const context = canvas.getContext('2d');
 
-      const video = $('#camera-stream')[0];
-      const canvas = $('#snapshot')[0];
-      const context = canvas.getContext('2d');
+        // Start the camera
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                video.srcObject = stream;
+            })
+            .catch(function (err) {
+                alert('Error accessing the camera: ' + err.message);
+            });
+        }
 
-      // Request access to the user's camera
-      function startCamera() {
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(function (stream) {
-            video.srcObject = stream;
-          })
-          .catch(function (err) {
-            alert('Error accessing the camera: ' + err.message);
-          });
-      }
+        // Handle Capture Button
+        $('#capture').on('click', function () {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Capture the current frame from the video stream
-      $('#capture').on('click', function () {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        $('#snapshot').show(); // Display the snapshot
-      });
+            // Show snapshot and toggle buttons
+            $('#snapshot').show();
+            $('#camera-stream').hide();
+            $('#capture').addClass('d-none'); // Hide Capture button
+            $('#save, #reset').removeClass('d-none'); // Show Save and Reset buttons
+            $.stopTimer();
+        });
 
-      // Start the camera on page load
-      startCamera();
+        // Handle Reset Button
+        $('#reset').on('click', function () {
+            $('#snapshot').hide();
+            $('#camera-stream').show();
+            $('#capture').removeClass('d-none'); // Show Capture button
+            $('#save, #reset').addClass('d-none'); // Hide Save and Reset buttons
+            $.startTimer(); // Mulai ulang timer
+        });
+
+        // Handle Save Button
+        $('#save').on('click', function () {
+            const imageData = canvas.toDataURL('image/png');
+            $.ajax({
+                url: "{{ route($attribute['link'].'store') }}",
+                type: "POST",
+                data: {
+                    pegawai: "{{ $pegawai->id }}",
+                    pengaturan: "{{ $pengaturan->id }}",
+                    tempatKerja: "{{ $pegawai->tempat_kerja_id }}",
+                    berkas: canvas.toDataURL('image/png'),
+                    tanggal: tanggal,
+                    waktu: waktu,
+                    koordinat: JSON.stringify(koordinat),
+                    tipe: "{{ $pengaturan->tipe }}",
+                },
+                dataType: "JSON",
+                success: function(t) {
+                    t.status ? (alertApp("success", t.message), cancel_preview()) : alertApp("error", t.message)
+                },
+                error: function(t, a, e) {
+                    alertApp("error", e)
+                }
+            });
+        });
+
+        // Start the camera on page load
+        startCamera();
 
 
 
@@ -110,65 +147,6 @@
         startTimer();
     });
 
-
-    // // Inisialisasi Webcam
-    // Webcam.set({
-    //     image_format: 'jpeg',
-    //     jpeg_quality: 100
-    // });
-    // Webcam.on('error', function() {
-    //     alertApp("error","Tidak bisa akses WebCam");
-    //     $('#ambilGambar').hide();
-    // });
-    // Webcam.attach('#kamera');
-
-    // // Fungsi untuk mengambil snapshot
-    // function preview_snapshot() {
-    //     Webcam.snap(function(gambar) {
-    //         berkas = gambar
-    //         $('#results').html('<img class="img-fluid" src="' + gambar + '"/>');
-    //     });
-    //     $('#kamera').hide();
-    //     $('#ambilGambar').hide();
-    //     $('#simpanGambar').show();
-    //     $.stopTimer(); // Hentikan timer saat snapshot
-    // }
-
-    // // Fungsi untuk membatalkan snapshot
-    // function cancel_preview() {
-    //     Webcam.unfreeze();
-    //     $('#kamera').show();
-    //     $('#results').html('');
-    //     $('#ambilGambar').show();
-    //     $('#simpanGambar').hide();
-    //     $.startTimer(); // Mulai ulang timer
-    // }
-
-    // Fungsi untuk menyimpan foto
-    function save_photo() {
-        $.ajax({
-            url: "{{ route($attribute['link'].'store') }}",
-            type: "POST",
-            data: {
-                pegawai: "{{ $pegawai->id }}",
-                pengaturan: "{{ $pengaturan->id }}",
-                tempatKerja: "{{ $pegawai->tempat_kerja_id }}",
-                berkas: berkas,
-                tanggal: tanggal,
-                waktu: waktu,
-                koordinat: JSON.stringify(koordinat),
-                tipe: "{{ $pengaturan->tipe }}",
-            },
-            dataType: "JSON",
-            success: function(t) {
-                t.status ? (alertApp("success", t.message), cancel_preview()) : alertApp("error", t.message)
-            },
-            error: function(t, a, e) {
-                alertApp("error", e)
-            }
-        });
-        // success
-    }
     // maps
     // Inisialisasi peta di Pekalongan
     var map = L.map('map').setView([-6.8883, 109.6753], 16);
