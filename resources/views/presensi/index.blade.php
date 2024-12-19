@@ -8,6 +8,12 @@
     <div class="card-body justify-align-center text-center">
         @if ($pengaturan)
             <h1>{{ $pengaturan->tipe }}</h1>
+
+            <video id="camera-stream" autoplay playsinline></video>
+            <button id="capture">Capture</button>
+            <canvas id="snapshot"></canvas>
+
+
             <div id="kamera" style="width: 100%;height: 30vh;"></div>
             <div id="results"></div>
             <div id="map" class="mt-1" style="height: 30vh;"></div>
@@ -41,6 +47,34 @@
     let waktu;
     let koordinat;
     $(document).ready(function() {
+
+      const video = $('#camera-stream')[0];
+      const canvas = $('#snapshot')[0];
+      const context = canvas.getContext('2d');
+
+      // Request access to the user's camera
+      function startCamera() {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(function (stream) {
+            video.srcObject = stream;
+          })
+          .catch(function (err) {
+            alert('Error accessing the camera: ' + err.message);
+          });
+      }
+
+      // Capture the current frame from the video stream
+      $('#capture').on('click', function () {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        $('#snapshot').show(); // Display the snapshot
+      });
+
+      // Start the camera on page load
+      startCamera();
+
+
 
         function updateTime() {
             const now = new Date();
@@ -77,38 +111,38 @@
     });
 
 
-    // Inisialisasi Webcam
-    Webcam.set({
-        image_format: 'jpeg',
-        jpeg_quality: 100
-    });
-    Webcam.on('error', function() {
-        alertApp("error","Tidak bisa akses WebCam");
-        $('#ambilGambar').hide();
-    });
-    Webcam.attach('#kamera');
+    // // Inisialisasi Webcam
+    // Webcam.set({
+    //     image_format: 'jpeg',
+    //     jpeg_quality: 100
+    // });
+    // Webcam.on('error', function() {
+    //     alertApp("error","Tidak bisa akses WebCam");
+    //     $('#ambilGambar').hide();
+    // });
+    // Webcam.attach('#kamera');
 
-    // Fungsi untuk mengambil snapshot
-    function preview_snapshot() {
-        Webcam.snap(function(gambar) {
-            berkas = gambar
-            $('#results').html('<img class="img-fluid" src="' + gambar + '"/>');
-        });
-        $('#kamera').hide();
-        $('#ambilGambar').hide();
-        $('#simpanGambar').show();
-        $.stopTimer(); // Hentikan timer saat snapshot
-    }
+    // // Fungsi untuk mengambil snapshot
+    // function preview_snapshot() {
+    //     Webcam.snap(function(gambar) {
+    //         berkas = gambar
+    //         $('#results').html('<img class="img-fluid" src="' + gambar + '"/>');
+    //     });
+    //     $('#kamera').hide();
+    //     $('#ambilGambar').hide();
+    //     $('#simpanGambar').show();
+    //     $.stopTimer(); // Hentikan timer saat snapshot
+    // }
 
-    // Fungsi untuk membatalkan snapshot
-    function cancel_preview() {
-        Webcam.unfreeze();
-        $('#kamera').show();
-        $('#results').html('');
-        $('#ambilGambar').show();
-        $('#simpanGambar').hide();
-        $.startTimer(); // Mulai ulang timer
-    }
+    // // Fungsi untuk membatalkan snapshot
+    // function cancel_preview() {
+    //     Webcam.unfreeze();
+    //     $('#kamera').show();
+    //     $('#results').html('');
+    //     $('#ambilGambar').show();
+    //     $('#simpanGambar').hide();
+    //     $.startTimer(); // Mulai ulang timer
+    // }
 
     // Fungsi untuk menyimpan foto
     function save_photo() {
