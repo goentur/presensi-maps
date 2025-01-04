@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Enums\StatusPresensi;
+use App\Enums\TipePengaturan;
 use App\Models\Pegawai;
+use App\Models\Pengaturan;
 use App\Models\Presensi;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class RiwayatController extends Controller
 {
@@ -28,6 +32,7 @@ class RiwayatController extends Controller
             'pegawai' => Pegawai::with('user')->where('user_id', auth()->id())->first(),
             'pegawais' => Pegawai::with('user')->get(),
             'bulan' => date('m-Y'),
+            'tipes' => TipePengaturan::cases(),
         ];
         return view($this->attribute['view'] . 'index', $data);
     }
@@ -180,5 +185,68 @@ class RiwayatController extends Controller
         }
 
         return $result;
+    }
+    public function simpan(Request $request)
+    {
+        $request->validate([
+            'pegawai' => 'required|exists:pegawais,id',
+            'tipe' => 'required|string|max:255',
+            'tanggal' => 'required|string|max:255',
+            'file' => 'required|file|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        if ($request->hasFile('file')) {
+            try {
+                DB::beginTransaction();
+                $file = $request->file('file');
+                $pegawai = Pegawai::find($request->pegawai);
+                $tanggal = explode("-", $request->tanggal);
+                $pengaturan = Pengaturan::where(['tempat_kerja_id' => $pegawai->tempat_kerja_id, 'tipe' => $request->tipe])
+                    ->first();
+                $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                $folderPath = "berkas/foto/";
+                $tanggalPresensi = $tanggal[2] . '-' . $tanggal[1] . '-' . $tanggal[0];
+                $presensi = Presensi::where([
+                    'pegawai_id' => $request->pegawai,
+                    'pengaturan_id' => $pengaturan->id,
+                    'tempat_kerja_id' => $pegawai->tempat_kerja_id,
+                    'tanggal' => $tanggalPresensi,
+                    'tipe' => $request->tipe,
+                ])->first();
+                if ($presensi) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Presensi sudah ada.',
+                    ]);
+                } else {
+                    Presensi::create([
+                        'pegawai_id' => $request->pegawai,
+                        'pengaturan_id' => $pengaturan->id,
+                        'tempat_kerja_id' => $pegawai->tempat_kerja_id,
+                        'berkas' => $folderPath . "" . $fileName,
+                        'tanggal' => $tanggalPresensi,
+                        'waktu' => $pengaturan->awal,
+                        'koordinat' => 0,
+                        'tipe' => $pengaturan->tipe,
+                        'status' => StatusPresensi::MASUK,
+                    ]);
+                }
+                DB::commit();
+                $file->storeAs($folderPath, $fileName, 'public');
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data berhasil disimpan.',
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Terjadi kesalahan saat melakukan pemrosesan data',
+                ]);
+            }
+        }
+
+        return response()->json(['success' => false, 'message' => 'Foto tidak ditemukan.']);
+    
     }
 }

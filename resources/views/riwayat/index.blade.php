@@ -54,8 +54,45 @@
         <h3 class="text-center">
             <span id="textBulan">{{ $bulan }}</span>
         </h3>
-    </div>
-    <div class="card-body">
+        @role('admin')
+        <div class="accordion" id="accordionPanelsStayOpenExample">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+                    FORM PRESENSI
+                </button>
+                </h2>
+                <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <form action="javascript:void(0)" id="formPresensi" class="row" method="POST" enctype="multipart/form-data">
+                        <div class="col-lg-3">
+                            <label class="form-label h5"><i class="fa fa-list"></i> TIPE PRESENSI :</label>
+                            <select required name="tipe" id="tipe" class="form-control select2">
+                                <option value="">Pilih salah satu</option>
+                                @foreach ($tipes as $tipe)
+                                <option value="{{ $tipe->value }}">{{ $tipe->value }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-lg-3">
+                            <label class="form-label h5"><i class="fa fa-calendar-alt"></i> TANGGAL :</label>
+                            <input type="text" class="form-control" required id="tanggal" name="tanggal" placeholder="Pilih tanggal presensi">
+                        </div>
+                        <div class="col-lg-3">
+                            <label class="form-label h5"><i class="fa fa-camera"></i> FOTO :</label>
+                            <input class="form-control" required type="file" name="file" id="file">
+                        </div>
+                        <div class="col-lg-3 d-grid">
+                            <label class="form-label h5">&nbsp; </label>
+                            <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> SIMPAN</a>
+                        </div>
+                    </form>
+                    <div class="text-danger text-bold" id="responsFormPresensi"></div>
+                </div>
+                </div>
+            </div>
+        </div>
+        @endrole
         <table id="data" class="table table-sm table-bordered table-hover dt-responsive">
             <thead>
                 <tr>
@@ -123,7 +160,7 @@
             }
         })
     }
-    $(function() {
+    $(function() {        
         flatpickr("#bulan", {
             locale: "id",
             dateFormat: "m-Y",
@@ -136,7 +173,46 @@
             ],
             defaultDate: "{{ $bulan }}",
             maxDate: "{{ $bulan }}"
-        }), data("{{ $pegawai->id }}", "{{ $bulan }}")
+        }),flatpickr("#tanggal", {
+            locale: "id",
+            dateFormat: "d-m-Y",
+            maxDate: "today",
+        }), data("{{ $pegawai->id }}", "{{ $bulan }}");
+
+
+        $('#formPresensi').on('submit', function (e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            var pegawai = $("#pegawai").val();
+            var bulan = $("#bulan").val();
+            let formData = new FormData(this); // Automatically includes all form fields and files
+            formData.append('pegawai', pegawai);
+            $.ajax({
+                url: "{{ route($attribute['link'].'simpan-presensi') }}", // Laravel route
+                type: 'POST',
+                data: formData,
+                processData: false, // Required for file uploads
+                contentType: false, // Required for file uploads
+                success: function (response) {
+                    if (response.status) {
+                        alertApp("success", response.message)
+                        data(pegawai, bulan)
+                    } else {
+                        alertApp("error", response.message)
+                    }
+                },
+                error: function (xhr) {
+                    // Handle validation or server errors
+                    let errors = xhr.responseJSON.errors;
+                    let errorMessages = '<ul>';
+                    $.each(errors, function (key, value) {
+                        errorMessages += `<li>${value}</li>`;
+                    });
+                    errorMessages += '</ul>';
+                    $('#responsFormPresensi').html(`<h4>ERRORS : </h4>${errorMessages}`);
+                }
+            });
+        });
     });
     $("button#btnCari").on("click", function() {
         var pegawai = $("#pegawai").val();

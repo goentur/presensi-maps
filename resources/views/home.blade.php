@@ -7,12 +7,14 @@
         <br>
         <span class="fs-2 text-uppercase">DI SISTEM INFORMASI PRESENSI {{ Auth::user()->name }}</span>
     </div>
-    @role(['admin','pegawai'])
+    @role(['pegawai'])
     <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
         <img class="img-fluid p-3" src="{{ asset('images/menus/presensi.svg') }}" alt="Menu Presensi" srcset="Menu Presensi">
         <p class="fw-bold text-uppercase fs-2">presensi</p>
         <a href="{{ route('presensi.index') }}" class="stretched-link"></a>
     </div>
+    @endrole
+    @role(['admin','pegawai'])
     <div class="col-4 col-lg-2 card bg-white shadow-lg text-center">
         <img class="img-fluid p-3" src="{{ asset('images/menus/riwayat.svg') }}" alt="Menu Riwayat" srcset="Menu Riwayat">
         <p class="fw-bold text-uppercase fs-2">riwayat</p>
