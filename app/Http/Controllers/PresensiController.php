@@ -76,7 +76,7 @@ class PresensiController extends Controller
             $fileName = Str::uuid() . '.png';
             $pegawai = Pegawai::find($request->pegawai);
             $pengaturan = Pengaturan::whereTime('awal', '<=', $request->waktu)
-                ->whereTime('terlambat', '>=', $request->waktu)->where('tempat_kerja_id', $pegawai->tempat_kerja_id)
+                ->whereTime('akhir', '>=', $request->waktu)->where('tempat_kerja_id', $pegawai->tempat_kerja_id)
                 ->first();
             $status = StatusPresensi::MASUK;
             if ($pengaturan) {

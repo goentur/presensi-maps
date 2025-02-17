@@ -70,7 +70,7 @@
                     </span>
                     @enderror
                 </div>
-                <div class="col-lg-2 mb-3">
+                {{-- <div class="col-lg-2 mb-3">
                     <label for="terlambat" class="form-label text-uppercase">terlambat <span class="text-danger">*</span></label>
                     <input required type="text" class="form-control waktu @error('terlambat')is-invalid @enderror" value="{{ isset($data)?$data->terlambat:old('terlambat') }}" id="terlambat" name="terlambat" placeholder="Masukan terlambat">
                     @error('terlambat')
@@ -78,7 +78,7 @@
                         <strong>{{ $message }}</strong>
                     </span>
                     @enderror
-                </div>
+                </div> --}}
                 <div class="col-lg-2 mb-3">
                     <label for="akhir" class="form-label text-uppercase">akhir <span class="text-danger">*</span></label>
                     <input required type="text" class="form-control waktu @error('akhir')is-invalid @enderror" value="{{ isset($data)?$data->akhir:old('akhir') }}" id="akhir" name="akhir" placeholder="Masukan akhir">

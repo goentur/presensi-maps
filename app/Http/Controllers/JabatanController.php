@@ -33,7 +33,7 @@ class JabatanController extends Controller
         $dataTable = $builder
             ->addIndex(['class' => 'w-1 text-center', 'data' => 'DT_RowIndex', 'name' => 'DT_RowIndex', 'title' => 'NO'])
             ->addColumn(['data' => 'nama', 'name' => 'nama', 'title' => 'NAMA'])
-            ->addColumn(['class' => 'w-1', 'data' => 'aksi', 'name' => 'aksi', 'title' => 'AKSI'])
+            // ->addColumn(['class' => 'w-1', 'data' => 'aksi', 'name' => 'aksi', 'title' => 'AKSI'])
             ->parameters([
                 'ordering' => false,
                 'responsive' => true,

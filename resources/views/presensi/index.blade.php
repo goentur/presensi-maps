@@ -9,13 +9,13 @@
         @if ($pengaturan)
             <h1>{{ $pengaturan->tipe }}</h1>
 
+            <div id="map" class="mt-1" style="height: 30vh;" class="mb-2"></div>
             <div class="d-flex flex-column align-items-center">
                 <video id="camera-stream" autoplay playsinline class="border rounded mb-3" style="max-width: 100%;"></video>
                 <canvas id="snapshot" class="border rounded mb-3" style="display: none; max-width: 100%;"></canvas>
 
                 <!-- Buttons -->
             </div>
-            <div id="map" class="mt-1" style="height: 30vh;"></div>
             <div id="button-group">
                 <h3 class="m-0 p-0 text-primary" id="local-date"></h3>
                 <h3 class="m-0 p-0 text-primary fw-semibold" id="local-time"></h3>

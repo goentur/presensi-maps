@@ -46,6 +46,7 @@ class TempatKerjaController extends Controller
         $data = [
             'attribute' => $this->attribute,
             'dataTable' => $dataTable,
+            'jmlTempatKerja' => TempatKerja::select('id')->get(),
         ];
         return view($this->attribute['view'] . 'index', $data);
     }
@@ -55,10 +56,15 @@ class TempatKerjaController extends Controller
      */
     public function create()
     {
-        $data = [
-            'attribute' => $this->attribute,
-        ];
-        return view($this->attribute['view'] . 'form', $data);
+        $jmlTempatKerja = TempatKerja::select('id')->get();
+        if (count($jmlTempatKerja) < 2) {
+            $data = [
+                'attribute' => $this->attribute,
+            ];
+            return view($this->attribute['view'] . 'form', $data);
+        } else {
+            return back()->with(['error' => 'Tempat kerja sudah ditambahkan']);
+        }
     }
 
     /**

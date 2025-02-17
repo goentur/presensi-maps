@@ -49,10 +49,12 @@ class RiwayatController extends Controller
     protected function proses($pegawai, $bulan)
     {
         $bulanExplode = explode("-", $bulan);
-        // Inisialisasi tanggal awal dan akhir
-        $startDate = Carbon::create($bulanExplode[1], $bulanExplode[0], 1);
-        $endDate = $startDate->copy()->endOfMonth();
 
+        // Inisialisasi tanggal awal
+        $startDate = Carbon::create($bulanExplode[1], $bulanExplode[0], 1);
+
+        // Jika bulan yang dipilih adalah bulan saat ini, gunakan tanggal hari ini sebagai endDate
+        $endDate = ($bulan == date('m-Y')) ? Carbon::today() : $startDate->copy()->endOfMonth();
         // Ambil data PRESENSI MASUK
         $masukData = Presensi::select('tanggal', 'berkas', 'tipe', 'waktu', 'status')
             ->where('pegawai_id', $pegawai)
@@ -99,7 +101,7 @@ class RiwayatController extends Controller
             // Menyusun hasil untuk setiap tanggal
             $result[] = [
                 'no' => $no++,
-                'tanggal' => $dateStr,
+                'tanggal' => $date->format('d-m-Y'),
                 'masuk' => $masuk,
                 'keluar' => $keluar,
                 'foto_masuk' => $foto_masuk,
@@ -128,7 +130,7 @@ class RiwayatController extends Controller
         $bulanExplode = explode("-", $bulan);
         // Inisialisasi tanggal awal dan akhir
         $startDate = Carbon::create($bulanExplode[1], $bulanExplode[0], 1);
-        $endDate = $startDate->copy()->endOfMonth();
+        $endDate = ($bulan == date('m-Y')) ? Carbon::today() : $startDate->copy()->endOfMonth();
 
         // Ambil data PRESENSI MASUK
         $masukData = Presensi::select('tanggal', 'berkas', 'tipe', 'waktu', 'status')

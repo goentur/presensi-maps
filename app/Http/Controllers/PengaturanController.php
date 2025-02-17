@@ -43,7 +43,7 @@ class PengaturanController extends Controller
             ->addColumn(['class' => 'w-1', 'data' => 'tipe', 'name' => 'tipe', 'title' => 'TIPE'])
             ->addColumn(['data' => 'keterangan', 'name' => 'keterangan', 'title' => 'KETERANGAN'])
             ->addColumn(['class' => 'w-1', 'data' => 'awal', 'name' => 'awal', 'title' => 'AWAL'])
-            ->addColumn(['class' => 'w-1', 'data' => 'terlambat', 'name' => 'terlambat', 'title' => 'TERLAMBAT'])
+            // ->addColumn(['class' => 'w-1', 'data' => 'terlambat', 'name' => 'terlambat', 'title' => 'TERLAMBAT'])
             ->addColumn(['class' => 'w-1', 'data' => 'akhir', 'name' => 'akhir', 'title' => 'AKHIR'])
             ->addColumn(['class' => 'w-1', 'data' => 'aksi', 'name' => 'aksi', 'title' => 'AKSI'])
             ->parameters([
@@ -58,6 +58,7 @@ class PengaturanController extends Controller
         $data = [
             'attribute' => $this->attribute,
             'dataTable' => $dataTable,
+            'jmlPengaturan' => Pengaturan::select('id')->get(),
         ];
         return view($this->attribute['view'] . 'index', $data);
     }
@@ -67,12 +68,17 @@ class PengaturanController extends Controller
      */
     public function create()
     {
-        $data = [
-            'attribute' => $this->attribute,
-            'tempatKerjas' => TempatKerja::all(),
-            'tipes' => TipePengaturan::cases(),
-        ];
-        return view($this->attribute['view'] . 'form', $data);
+        $jmlPengaturan = Pengaturan::select('id')->get();
+        if (count($jmlPengaturan) < 2) {
+            $data = [
+                'attribute' => $this->attribute,
+                'tempatKerjas' => TempatKerja::all(),
+                'tipes' => TipePengaturan::cases(),
+            ];
+            return view($this->attribute['view'] . 'form', $data);
+        } else {
+            return back()->with(['error' => 'Pengaturan jam sudah dilakukan']);
+        }
     }
 
     /**
@@ -85,7 +91,7 @@ class PengaturanController extends Controller
             'tipe' => 'required|string|max:255',
             'keterangan' => 'required|string|max:255',
             'awal' => 'required|date_format:H:i',
-            'terlambat' => 'required|date_format:H:i',
+            // 'terlambat' => 'required|date_format:H:i',
             'akhir' => 'required|date_format:H:i',
         ]);
         Pengaturan::create([
@@ -93,7 +99,7 @@ class PengaturanController extends Controller
             'tipe' => $request->tipe,
             'keterangan' => $request->keterangan,
             'awal' => $request->awal,
-            'terlambat' => $request->terlambat,
+            'terlambat' => '00:00',
             'akhir' => $request->akhir,
         ]);
         return redirect()->route($this->attribute['link'] . 'index')->with(['success' => 'Data berhasil disimpan']);
@@ -131,7 +137,7 @@ class PengaturanController extends Controller
             'tipe' => 'required|string|max:255',
             'keterangan' => 'required|string|max:255',
             'awal' => 'required|date_format:H:i',
-            'terlambat' => 'required|date_format:H:i',
+            // 'terlambat' => 'required|date_format:H:i',
             'akhir' => 'required|date_format:H:i',
         ]);
         $pengaturan->update([
@@ -139,7 +145,7 @@ class PengaturanController extends Controller
             'tipe' => $request->tipe,
             'keterangan' => $request->keterangan,
             'awal' => $request->awal,
-            'terlambat' => $request->terlambat,
+            // 'terlambat' => '00:00',
             'akhir' => $request->akhir,
         ]);
         return redirect()->route($this->attribute['link'] . 'index')->with(['success' => 'Data berhasil diubah']);

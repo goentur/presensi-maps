@@ -9,7 +9,7 @@
             </div>
             <div class="col-lg-6 text-end">
                 <a href="{{ route('home') }}" class="btn btn-danger"><i class="fa fa-arrow-left"></i> KEMBALI KE MENU</a>
-                <a href="{{ route($attribute['link'].'create') }}" class="btn btn-primary"><i class="fa fa-plus"></i> TAMBAH DATA</a>
+                {{-- <a href="{{ route($attribute['link'].'create') }}" class="btn btn-primary"><i class="fa fa-plus"></i> TAMBAH DATA</a> --}}
             </div>
         </div>
     </div>
