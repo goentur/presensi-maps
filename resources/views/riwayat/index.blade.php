@@ -102,6 +102,7 @@
                     <th>PULANG</th>
                     <th>FOTO MASUK</th>
                     <th>FOTO PULANG</th>
+                    <th>AKSI</th>
                 </tr>
             </thead>
         </table>
@@ -154,6 +155,9 @@
             }, {
                 className: "text-center",
                 data: "foto_pulang"
+            }, {
+                className: "w-1 text-center",
+                data: "aksi"
             }],
             initComplete: function(a, t) {
                 $("#textBulan").html(t.bulan)
@@ -222,5 +226,31 @@
     $('#pegawai').select2({
         theme: 'bootstrap-5'
     });
+    function handleAction(action, tanggal) {
+        var pegawai = $("#pegawai").val();
+        var a = $("#bulan").val();
+        $.ajax({
+            url: "{{ route($attribute['link'].'validasi-presensi') }}", // Laravel route
+            type: 'POST',
+            data: {
+                action:action,
+                pegawai:pegawai,
+                tanggal:tanggal,
+            },
+            success: function (response) {
+                if (response.status) {
+                    alertApp("success", response.message)
+                    data(pegawai, a)
+                } else {
+                    alertApp("error", response.message)
+                }
+            },
+            error: function (xhr) {
+                // Handle validation or server errors
+                let errors = xhr.responseJSON.errors;
+                alertApp("error", errors)
+            }
+        });
+    }
 </script>
 @endpush

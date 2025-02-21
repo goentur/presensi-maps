@@ -122,6 +122,7 @@
                                     <th align="center" style="color: black; font-family: 'Times New Roman'; font-size: 14px">PULANG</th>
                                     <th align="center" style="color: black; font-family: 'Times New Roman'; font-size: 14px">FOTO MASUK</th>
                                     <th align="center" style="color: black; font-family: 'Times New Roman'; font-size: 14px">FOTO PULANG</th>
+                                    <th align="center" style="color: black; font-family: 'Times New Roman'; font-size: 14px">VALIDASI</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -133,6 +134,7 @@
                                     <td style="color: black; font-family: 'Times New Roman'; font-size: 12px">{!! $value['keluar'] !!}</td>
                                     <td style="color: black; font-family: 'Times New Roman'; font-size: 12px;text-align: center">{!! $value['foto_masuk'] !!}</td>
                                     <td style="color: black; font-family: 'Times New Roman'; font-size: 12px;text-align: center">{!! $value['foto_pulang'] !!}</td>
+                                    <td style="color: black; font-family: 'Times New Roman'; font-size: 12px">{{ $value['status_presensi'] }}</td>
                             </tr>
                             @endforeach
                         </tbody>

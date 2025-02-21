@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
         Route::post('riwayat/data', [RiwayatController::class, 'data'])->name('riwayat.data');
         Route::post('riwayat/cetak', [RiwayatController::class, 'cetak'])->name('riwayat.cetak');
         Route::post('riwayat/simpan-presensi', [RiwayatController::class, 'simpan'])->name('riwayat.simpan-presensi');
+        Route::post('riwayat/validasi-presensi', [RiwayatController::class, 'validasi'])->name('riwayat.validasi-presensi');
         // akun
         Route::get('akun', [AkunController::class, 'index'])->name('akun.index');
         Route::post('akun/ubah-password', [AkunController::class, 'ubahPassword'])->name('akun.ubah-password');

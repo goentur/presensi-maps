@@ -92,6 +92,7 @@ class PresensiController extends Controller
                 'koordinat' => $request->koordinat,
                 'tipe' => $request->tipe,
                 'status' => $status,
+                'status_presensi' => null,
             ]);
             DB::commit();
             Storage::put($folderPath . $fileName, $berkas_base64);
@@ -103,7 +104,7 @@ class PresensiController extends Controller
             DB::rollBack();
             return response()->json([
                 'status' => false,
-                'message' => 'Terjadi kesalahan saat melakukan transaksi penjualan',
+                'message' => 'Terjadi kesalahan saat melakukan penyimpanan data',
             ]);
         }
     }

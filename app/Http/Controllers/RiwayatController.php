@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\StatusPresensi;
+use App\Enums\StatusPresensiData;
 use App\Enums\TipePengaturan;
 use App\Models\Pegawai;
 use App\Models\Pengaturan;
@@ -56,7 +57,7 @@ class RiwayatController extends Controller
         // Jika bulan yang dipilih adalah bulan saat ini, gunakan tanggal hari ini sebagai endDate
         $endDate = ($bulan == date('m-Y')) ? Carbon::today() : $startDate->copy()->endOfMonth();
         // Ambil data PRESENSI MASUK
-        $masukData = Presensi::select('tanggal', 'berkas', 'tipe', 'waktu', 'status')
+        $masukData = Presensi::select('tanggal', 'berkas', 'tipe', 'waktu', 'status', 'status_presensi')
             ->where('pegawai_id', $pegawai)
             ->where('tipe', 'PRESENSI MASUK')
             ->whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
@@ -64,7 +65,7 @@ class RiwayatController extends Controller
             ->keyBy('tanggal'); // Kelompokkan berdasarkan tanggal
 
         // Ambil data PRESENSI PULANG
-        $keluarData = Presensi::select('tanggal', 'berkas', 'tipe', 'waktu', 'status')
+        $keluarData = Presensi::select('tanggal', 'berkas', 'tipe', 'waktu', 'status', 'status_presensi')
             ->where('pegawai_id', $pegawai)
             ->where('tipe', 'PRESENSI PULANG')
             ->whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
@@ -78,6 +79,7 @@ class RiwayatController extends Controller
             // Nilai default untuk presensi masuk dan keluar
             $masuk = $keluar = '';
             $foto_masuk = $foto_pulang = '';
+            $aksi = '';
 
             if ($date->isWeekend()) {
                 $masuk = $keluar = '<span class="badge bg-secondary">HARI LIBUR</span>';
@@ -96,6 +98,14 @@ class RiwayatController extends Controller
                     $keluar = '<span title="' . $status->value . '" class="badge bg-' . $status->color() . '">' . $data->waktu . '</span>';
                     $foto_pulang = '<a href="' . url('storage/' . $data->berkas) . '" target="popup" onclick="window.open(`' . url('storage/' . $data->berkas) . '`,`' . $data->value . '`,`width=800,height=600`)" class="btn btn-sm btn-primary"><i class="fa fa-camera"></i></a>';
                 }
+                if ($masukData->has($dateStr) && $keluarData->has($dateStr) && $masukData[$dateStr]->status_presensi == null && $keluarData[$dateStr]->status_presensi == null) {
+                    $role = auth()->user()->getRoleNames()->first();
+                    $aksi = $role === 'admin' ? '<div class="btn-group" role="group" aria-label="aksi"><button type="button" onclick="handleAction(\'terima\',`' . $dateStr . '`)" class="btn btn-sm btn-primary">TERIMA</button><button type="button" onclick="handleAction(\'tolak\',`' . $dateStr . '`)" class="btn btn-sm btn-danger">TOLAK</button></div>' : null;
+                }
+                if ($masukData->has($dateStr) && $keluarData->has($dateStr) && $masukData[$dateStr]->status_presensi != null && $keluarData[$dateStr]->status_presensi != null) {
+                    $color = $keluarData[$dateStr]->status_presensi === 'TERIMA' ? 'success' : 'danger';
+                    $aksi = '<span class="badge bg-' . $color . '">' . $keluarData[$dateStr]->status_presensi . '</span>';
+                }
             }
 
             // Menyusun hasil untuk setiap tanggal
@@ -106,10 +116,24 @@ class RiwayatController extends Controller
                 'keluar' => $keluar,
                 'foto_masuk' => $foto_masuk,
                 'foto_pulang' => $foto_pulang,
+                'aksi' => $aksi,
             ];
         }
 
         return $result;
+    }
+    public function validasi(Request $request)
+    {
+        Presensi::where([
+            'pegawai_id' => $request->pegawai,
+            'tanggal' => $request->tanggal
+        ])->update([
+            'status_presensi' => constant(StatusPresensiData::class . '::' . strtoupper($request->action))
+        ]);
+        return response()->json([
+            'status' => true,
+            'message' => 'Data berhasil ' . $request->action,
+        ]);
     }
     public function cetak(Request $request)
     {
@@ -133,7 +157,7 @@ class RiwayatController extends Controller
         $endDate = ($bulan == date('m-Y')) ? Carbon::today() : $startDate->copy()->endOfMonth();
 
         // Ambil data PRESENSI MASUK
-        $masukData = Presensi::select('tanggal', 'berkas', 'tipe', 'waktu', 'status')
+        $masukData = Presensi::select('tanggal', 'berkas', 'tipe', 'waktu', 'status', 'status_presensi')
             ->where('pegawai_id', $pegawai)
             ->where('tipe', 'PRESENSI MASUK')
             ->whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
@@ -141,7 +165,7 @@ class RiwayatController extends Controller
             ->keyBy('tanggal'); // Kelompokkan berdasarkan tanggal
 
         // Ambil data PRESENSI PULANG
-        $keluarData = Presensi::select('tanggal', 'berkas', 'tipe', 'waktu', 'status')
+        $keluarData = Presensi::select('tanggal', 'berkas', 'tipe', 'waktu', 'status', 'status_presensi')
             ->where('pegawai_id', $pegawai)
             ->where('tipe', 'PRESENSI PULANG')
             ->whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
@@ -155,6 +179,7 @@ class RiwayatController extends Controller
             // Nilai default untuk presensi masuk dan keluar
             $masuk = $keluar = '';
             $foto_masuk = $foto_pulang = '';
+            $status_presensi = '';
 
             if ($date->isWeekend()) {
                 $masuk = $keluar = '<span class="badge bg-secondary">HARI LIBUR</span>';
@@ -173,6 +198,9 @@ class RiwayatController extends Controller
                     $keluar = '<span title="' . $status->value . '" class="badge bg-' . $status->color() . '">' . $data->waktu . '</span>';
                     $foto_pulang = '<img src="' . url('storage/' . $data->berkas) . '" width="50%">';
                 }
+                if ($masukData->has($dateStr) && $keluarData->has($dateStr) && $masukData[$dateStr]->status_presensi != null && $keluarData[$dateStr]->status_presensi != null) {
+                    $status_presensi =  $keluarData[$dateStr]->status_presensi;
+                }
             }
 
             // Menyusun hasil untuk setiap tanggal
@@ -183,6 +211,7 @@ class RiwayatController extends Controller
                 'keluar' => $keluar,
                 'foto_masuk' => $foto_masuk,
                 'foto_pulang' => $foto_pulang,
+                'status_presensi' => $status_presensi,
             ];
         }
 
