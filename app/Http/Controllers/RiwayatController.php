@@ -57,7 +57,7 @@ class RiwayatController extends Controller
         // Jika bulan yang dipilih adalah bulan saat ini, gunakan tanggal hari ini sebagai endDate
         $endDate = ($bulan == date('m-Y')) ? Carbon::today() : $startDate->copy()->endOfMonth();
         // Ambil data PRESENSI MASUK
-        $masukData = Presensi::select('tanggal', 'berkas', 'tipe', 'waktu', 'status', 'status_presensi')
+        $masukData = Presensi::select('id', 'tanggal', 'berkas', 'tipe', 'waktu', 'status', 'status_presensi')
             ->where('pegawai_id', $pegawai)
             ->where('tipe', 'PRESENSI MASUK')
             ->whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
@@ -65,7 +65,7 @@ class RiwayatController extends Controller
             ->keyBy('tanggal'); // Kelompokkan berdasarkan tanggal
 
         // Ambil data PRESENSI PULANG
-        $keluarData = Presensi::select('tanggal', 'berkas', 'tipe', 'waktu', 'status', 'status_presensi')
+        $keluarData = Presensi::select('id', 'tanggal', 'berkas', 'tipe', 'waktu', 'status', 'status_presensi')
             ->where('pegawai_id', $pegawai)
             ->where('tipe', 'PRESENSI PULANG')
             ->whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
@@ -79,7 +79,7 @@ class RiwayatController extends Controller
             // Nilai default untuk presensi masuk dan keluar
             $masuk = $keluar = '';
             $foto_masuk = $foto_pulang = '';
-            $aksi = '';
+            $aksi_masuk = $aksi_keluar = '';
 
             if ($date->isWeekend()) {
                 $masuk = $keluar = '<span class="badge bg-secondary">HARI LIBUR</span>';
@@ -98,13 +98,23 @@ class RiwayatController extends Controller
                     $keluar = '<span title="' . $status->value . '" class="badge bg-' . $status->color() . '">' . $data->waktu . '</span>';
                     $foto_pulang = '<a href="' . url('storage/' . $data->berkas) . '" target="popup" onclick="window.open(`' . url('storage/' . $data->berkas) . '`,`' . $data->value . '`,`width=800,height=600`)" class="btn btn-sm btn-primary"><i class="fa fa-camera"></i></a>';
                 }
-                if ($masukData->has($dateStr) && $keluarData->has($dateStr) && $masukData[$dateStr]->status_presensi == null && $keluarData[$dateStr]->status_presensi == null) {
+                if ($masukData->has($dateStr) && $masukData[$dateStr]->status_presensi == null) {
+                    $data = $masukData[$dateStr];
                     $role = auth()->user()->getRoleNames()->first();
-                    $aksi = $role === 'admin' ? '<div class="btn-group" role="group" aria-label="aksi"><button type="button" onclick="handleAction(\'terima\',`' . $dateStr . '`)" class="btn btn-sm btn-primary">TERIMA</button><button type="button" onclick="handleAction(\'tolak\',`' . $dateStr . '`)" class="btn btn-sm btn-danger">TOLAK</button></div>' : null;
+                    $aksi_masuk = $role === 'admin' ? '<div class="btn-group" role="group" aria-label="aksi"><button type="button" onclick="handleAction(\'terima\',`' . $data->id . '`)" class="btn btn-sm btn-primary">TERIMA</button><button type="button" onclick="handleAction(\'tolak\',`' . $data->id . '`)" class="btn btn-sm btn-danger">TOLAK</button></div>' : null;
                 }
-                if ($masukData->has($dateStr) && $keluarData->has($dateStr) && $masukData[$dateStr]->status_presensi != null && $keluarData[$dateStr]->status_presensi != null) {
+                if ($keluarData->has($dateStr) && $keluarData[$dateStr]->status_presensi == null) {
+                    $data = $keluarData[$dateStr];
+                    $role = auth()->user()->getRoleNames()->first();
+                    $aksi_keluar = $role === 'admin' ? '<div class="btn-group" role="group" aria-label="aksi"><button type="button" onclick="handleAction(\'terima\',`' . $data->id . '`)" class="btn btn-sm btn-primary">TERIMA</button><button type="button" onclick="handleAction(\'tolak\',`' . $data->id . '`)" class="btn btn-sm btn-danger">TOLAK</button></div>' : null;
+                }
+                if ($masukData->has($dateStr) && $masukData[$dateStr]->status_presensi != null) {
+                    $color = $masukData[$dateStr]->status_presensi === 'TERIMA' ? 'success' : 'danger';
+                    $aksi_masuk = '<span class="badge bg-' . $color . '">' . $masukData[$dateStr]->status_presensi . '</span>';
+                }
+                if ($keluarData->has($dateStr) && $keluarData[$dateStr]->status_presensi != null) {
                     $color = $keluarData[$dateStr]->status_presensi === 'TERIMA' ? 'success' : 'danger';
-                    $aksi = '<span class="badge bg-' . $color . '">' . $keluarData[$dateStr]->status_presensi . '</span>';
+                    $aksi_keluar = '<span class="badge bg-' . $color . '">' . $keluarData[$dateStr]->status_presensi . '</span>';
                 }
             }
 
@@ -115,8 +125,9 @@ class RiwayatController extends Controller
                 'masuk' => $masuk,
                 'keluar' => $keluar,
                 'foto_masuk' => $foto_masuk,
+                'aksi_masuk' => $aksi_masuk,
                 'foto_pulang' => $foto_pulang,
-                'aksi' => $aksi,
+                'aksi_keluar' => $aksi_keluar,
             ];
         }
 
@@ -124,10 +135,7 @@ class RiwayatController extends Controller
     }
     public function validasi(Request $request)
     {
-        Presensi::where([
-            'pegawai_id' => $request->pegawai,
-            'tanggal' => $request->tanggal
-        ])->update([
+        Presensi::find($request->id)->update([
             'status_presensi' => constant(StatusPresensiData::class . '::' . strtoupper($request->action))
         ]);
         return response()->json([
@@ -179,7 +187,7 @@ class RiwayatController extends Controller
             // Nilai default untuk presensi masuk dan keluar
             $masuk = $keluar = '';
             $foto_masuk = $foto_pulang = '';
-            $status_presensi = '';
+            $status_masuk = $status_keluar = '';
 
             if ($date->isWeekend()) {
                 $masuk = $keluar = '<span class="badge bg-secondary">HARI LIBUR</span>';
@@ -198,8 +206,11 @@ class RiwayatController extends Controller
                     $keluar = '<span title="' . $status->value . '" class="badge bg-' . $status->color() . '">' . $data->waktu . '</span>';
                     $foto_pulang = '<img src="' . url('storage/' . $data->berkas) . '" width="50%">';
                 }
-                if ($masukData->has($dateStr) && $keluarData->has($dateStr) && $masukData[$dateStr]->status_presensi != null && $keluarData[$dateStr]->status_presensi != null) {
-                    $status_presensi =  $keluarData[$dateStr]->status_presensi;
+                if ($masukData->has($dateStr) && $masukData[$dateStr]->status_presensi != null) {
+                    $status_masuk =  $keluarData[$dateStr]->status_presensi;
+                }
+                if ($keluarData->has($dateStr) && $keluarData[$dateStr]->status_presensi != null) {
+                    $status_keluar =  $keluarData[$dateStr]->status_presensi;
                 }
             }
 
@@ -210,8 +221,9 @@ class RiwayatController extends Controller
                 'masuk' => $masuk,
                 'keluar' => $keluar,
                 'foto_masuk' => $foto_masuk,
+                'status_masuk' => $status_masuk,
                 'foto_pulang' => $foto_pulang,
-                'status_presensi' => $status_presensi,
+                'status_keluar' => $status_keluar,
             ];
         }
 

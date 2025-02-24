@@ -101,8 +101,9 @@
                     <th>MASUK</th>
                     <th>PULANG</th>
                     <th>FOTO MASUK</th>
+                    <th>AKSI MASUK</th>
                     <th>FOTO PULANG</th>
-                    <th>AKSI</th>
+                    <th>AKSI PULANG</th>
                 </tr>
             </thead>
         </table>
@@ -154,10 +155,13 @@
                 data: "foto_masuk"
             }, {
                 className: "text-center",
+                data: "aksi_masuk"
+            }, {
+                className: "text-center",
                 data: "foto_pulang"
             }, {
-                className: "w-1 text-center",
-                data: "aksi"
+                className: "text-center",
+                data: "aksi_keluar"
             }],
             initComplete: function(a, t) {
                 $("#textBulan").html(t.bulan)
@@ -226,7 +230,7 @@
     $('#pegawai').select2({
         theme: 'bootstrap-5'
     });
-    function handleAction(action, tanggal) {
+    function handleAction(action, id) {
         var pegawai = $("#pegawai").val();
         var a = $("#bulan").val();
         $.ajax({
@@ -234,8 +238,7 @@
             type: 'POST',
             data: {
                 action:action,
-                pegawai:pegawai,
-                tanggal:tanggal,
+                id:id,
             },
             success: function (response) {
                 if (response.status) {
